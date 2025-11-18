@@ -44,3 +44,29 @@ type UpdateUserRequest struct {
 	Email    string `json:"email,omitempty"`
 	Password string `json:"password,omitempty"`
 }
+
+type Credentials struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (c Credentials) Validate() ValidationResult {
+	var r ValidationResult
+	r.Validated = true
+	if len(c.Email) < 1 {
+		r.Validated = false
+		r.Message = fmt.Sprintf(r.Message + " Missing email")
+	}
+
+	if len(c.Password) < 1 {
+		r.Validated = false
+		r.Message = fmt.Sprintf(r.Message + " Missing password")
+	}
+
+	if !helpers.IsValidEmail(c.Email) {
+		r.Validated = false
+		r.Message = fmt.Sprintf(r.Message + " Email invalid.")
+	}
+
+	return r
+}

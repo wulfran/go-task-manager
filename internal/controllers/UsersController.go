@@ -12,14 +12,23 @@ import (
 
 type UsersController interface {
 	Store(BodySizeLimit int64) func(http.ResponseWriter, *http.Request)
+	Login() func(w http.ResponseWriter, r *http.Request)
 }
 
 type usersController struct {
-	s services.UserService
+	us services.UserService
+	as services.AuthService
 }
 
-func NewUsersController(s services.UserService) UsersController {
-	return &usersController{s: s}
+func NewUsersController(us services.UserService, as services.AuthService) UsersController {
+	return &usersController{
+		us: us,
+		as: as,
+	}
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
 }
 
 func (uc usersController) Store(BodySizeLimit int64) func(http.ResponseWriter, *http.Request) {
@@ -46,11 +55,47 @@ func (uc usersController) Store(BodySizeLimit int64) func(http.ResponseWriter, *
 			Password: request.Password,
 		}
 
-		if err := uc.s.RegisterUser(r.Context(), payload); err != nil {
+		if err := uc.us.RegisterUser(r.Context(), payload); err != nil {
 			helpers.JsonResponse(w, 500, fmt.Sprintf("store user: failed to register: %v", err))
 			return
 		}
 
 		helpers.JsonResponse(w, 200, fmt.Sprintf("successfully created user"))
+	}
+}
+func (uc usersController) Login() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req requests.Credentials
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			helpers.JsonResponse(w, 400, fmt.Sprintf("login error, incorrect payload: %v", err))
+			return
+		}
+
+		v := req.Validate()
+		if !v.Validated {
+			helpers.JsonResponse(w, 422, fmt.Sprintf("login: login request is invalid: %s", v.Message))
+			return
+		}
+
+		p := models.LoginPayload{
+			Email:    req.Email,
+			Password: req.Password,
+		}
+
+		u, err := uc.us.LoginUser(p)
+		if err != nil {
+			helpers.JsonResponse(w, 401, fmt.Sprintf("failed to authenticate: %v", err))
+			return
+		}
+		fmt.Printf("%v", u)
+
+		token, err := uc.as.CreateToken(u)
+		if err != nil {
+			helpers.JsonResponse(w, 500, fmt.Sprintf("failed to generate JWT token, %v", err))
+			return
+		}
+
+		helpers.JsonResponse(w, 200, AuthResponse{Token: token})
+		return
 	}
 }

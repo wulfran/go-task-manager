@@ -27,6 +27,14 @@ func (s Server) CreateServer() *chi.Mux {
 		_, _ = w.Write([]byte("pong"))
 	})
 	r.Post("/register", s.C.Uc.Store(bodySizeLimit))
+	r.Post("/login", s.C.Uc.Login())
+
+	r.Group(func(r chi.Router) {
+		r.Use(s.Authenticate)
+		r.Get("/marco", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("polo!"))
+		})
+	})
 
 	return r
 }

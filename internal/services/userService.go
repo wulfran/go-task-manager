@@ -10,6 +10,8 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, p models.CreateUserPayload) error
+	LoginUser(p models.LoginPayload) (models.User, error)
+	CheckIfEmailExists(e string) (bool, error)
 }
 
 type userService struct {
@@ -37,4 +39,17 @@ func (s userService) RegisterUser(ctx context.Context, p models.CreateUserPayloa
 	}
 
 	return nil
+}
+
+func (s userService) LoginUser(p models.LoginPayload) (models.User, error) {
+	u, err := s.r.GetUserData(p)
+	if err != nil {
+		return models.User{}, fmt.Errorf("LoginUser: failet to get user data: %v", err)
+	}
+
+	return u, nil
+}
+
+func (s userService) CheckIfEmailExists(e string) (bool, error) {
+	return s.r.CheckIfEmailExists(e)
 }

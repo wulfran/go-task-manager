@@ -12,6 +12,7 @@ import (
 type UserRepository interface {
 	CreateUser(ctx context.Context, r models.CreateUserPayload) error
 	CheckIfEmailExists(email string) (bool, error)
+	GetUserData(p models.LoginPayload) (models.User, error)
 }
 
 type userRepository struct {
@@ -69,4 +70,23 @@ func (u userRepository) CheckIfEmailExists(email string) (bool, error) {
 	}
 
 	return exists, nil
+}
+func (u userRepository) GetUserData(p models.LoginPayload) (models.User, error) {
+	q, err := db.GetQuery(helpers.GetQueryPath("user/LoginUser.sql"))
+	if err != nil {
+		return models.User{}, fmt.Errorf("GetUserData: error while reading query: %v", err)
+	}
+	var uData models.User
+
+	err = u.db.QueryRow(q, p.Email).Scan(&uData.ID, &uData.Name, &uData.Email, &uData.Password, &uData.CreatedAt)
+
+	if err != nil {
+		return models.User{}, fmt.Errorf("GetUserData: failed to execute query: %v", err)
+	}
+
+	if !helpers.ValidatePassword(p.Password, uData.Password) {
+		return models.User{}, fmt.Errorf("incorrect credentials")
+	}
+
+	return uData, nil
 }

@@ -8,6 +8,6 @@ type Controllers struct {
 
 func New(s services.Services) Controllers {
 	return Controllers{
-		Uc: NewUsersController(s.Us),
+		Uc: NewUsersController(s.Us, s.As),
 	}
 }

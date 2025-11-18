@@ -32,6 +32,11 @@ func HashPassword(p string) string {
 	return string(bytes)
 }
 
+func ValidatePassword(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 func JsonResponse(w http.ResponseWriter, status int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
