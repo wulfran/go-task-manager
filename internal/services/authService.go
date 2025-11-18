@@ -26,6 +26,7 @@ func NewAuthService() AuthService {
 func (a authService) CreateToken(u models.User) (string, error) {
 	claims := jwt.MapClaims{
 		"username": u.Email,
+		"userId":   u.ID,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(),
 	}
 
