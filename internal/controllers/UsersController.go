@@ -39,13 +39,13 @@ func (uc usersController) Store(BodySizeLimit int64) func(http.ResponseWriter, *
 
 		err := json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
-			helpers.JsonResponse(w, 413, fmt.Sprintf("store user: Request Body Too Large"))
+			helpers.JsonResponse(w, http.StatusRequestEntityTooLarge, fmt.Sprintf("store user: request body too large: %v", err))
 			return
 		}
 
 		v := request.Validate()
 		if !v.Validated {
-			helpers.JsonResponse(w, 422, fmt.Sprintf("store user validation failed: %s", v.Message))
+			helpers.JsonResponse(w, http.StatusUnprocessableEntity, fmt.Sprintf("store user validation failed: %s", v.Message))
 			return
 		}
 
@@ -56,11 +56,11 @@ func (uc usersController) Store(BodySizeLimit int64) func(http.ResponseWriter, *
 		}
 
 		if err := uc.us.RegisterUser(r.Context(), payload); err != nil {
-			helpers.JsonResponse(w, 500, fmt.Sprintf("store user: failed to register: %v", err))
+			helpers.JsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("store user: failed to register: %v", err))
 			return
 		}
 
-		helpers.JsonResponse(w, 200, fmt.Sprintf("successfully created user"))
+		helpers.JsonResponse(w, http.StatusOK, fmt.Sprintf("successfully created user"))
 	}
 }
 func (uc usersController) Login() func(w http.ResponseWriter, r *http.Request) {
