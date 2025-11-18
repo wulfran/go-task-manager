@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -39,6 +40,8 @@ func (s Server) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 		email := claims["username"].(string)
+		fID := claims["userId"].(float64)
+		uID := int64(fID)
 
 		exists, err := s.S.Us.CheckIfEmailExists(email)
 		if err != nil || !exists {
@@ -46,6 +49,6 @@ func (s Server) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "uID", uID)))
 	})
 }

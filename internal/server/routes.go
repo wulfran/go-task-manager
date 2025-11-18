@@ -34,6 +34,14 @@ func (s Server) CreateServer() *chi.Mux {
 		r.Get("/marco", func(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write([]byte("polo!"))
 		})
+
+		r.Route("/tasks", func(r chi.Router) {
+			r.Get("/", s.C.Tc.Index())
+			r.Get("/{task_id}", s.C.Tc.Show())
+			r.Post("/", s.C.Tc.Store(bodySizeLimit))
+			r.Patch("/{task_id}", s.C.Tc.Update(bodySizeLimit))
+			r.Delete("/{task_id}", s.C.Tc.Delete())
+		})
 	})
 
 	return r
