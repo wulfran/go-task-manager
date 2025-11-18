@@ -1,7 +1,6 @@
 package requests
 
 import (
-	"fmt"
 	"task-manager/internal/helpers"
 )
 
@@ -44,18 +43,15 @@ func (c Credentials) Validate() ValidationResult {
 	var r ValidationResult
 	r.Validated = true
 	if len(c.Email) < 1 {
-		r.Validated = false
-		r.Message = fmt.Sprintf(r.Message + " Missing email")
+		r.SetFailed("Missing e-mail")
 	}
 
 	if len(c.Password) < 1 {
-		r.Validated = false
-		r.Message = fmt.Sprintf(r.Message + " Missing password")
+		r.SetFailed("Missing password")
 	}
 
 	if !helpers.IsValidEmail(c.Email) {
-		r.Validated = false
-		r.Message = fmt.Sprintf(r.Message + " Email invalid.")
+		r.SetFailed("E-mail invalid")
 	}
 
 	return r
