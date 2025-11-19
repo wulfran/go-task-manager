@@ -67,13 +67,13 @@ func (uc usersController) Login() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req requests.Credentials
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			helpers.JsonResponse(w, 400, fmt.Sprintf("login error, incorrect payload: %v", err))
+			helpers.JsonResponse(w, http.StatusBadRequest, fmt.Sprintf("login error, incorrect payload: %v", err))
 			return
 		}
 
 		v := req.Validate()
 		if !v.Validated {
-			helpers.JsonResponse(w, 422, fmt.Sprintf("login: login request is invalid: %s", v.Message))
+			helpers.JsonResponse(w, http.StatusUnprocessableEntity, fmt.Sprintf("login: login request is invalid: %s", v.Message))
 			return
 		}
 
@@ -84,18 +84,18 @@ func (uc usersController) Login() func(w http.ResponseWriter, r *http.Request) {
 
 		u, err := uc.us.LoginUser(p)
 		if err != nil {
-			helpers.JsonResponse(w, 401, fmt.Sprintf("failed to authenticate: %v", err))
+			helpers.JsonResponse(w, http.StatusUnauthorized, fmt.Sprintf("failed to authenticate: %v", err))
 			return
 		}
 		fmt.Printf("%v", u)
 
 		token, err := uc.as.CreateToken(u)
 		if err != nil {
-			helpers.JsonResponse(w, 500, fmt.Sprintf("failed to generate JWT token, %v", err))
+			helpers.JsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("failed to generate JWT token, %v", err))
 			return
 		}
 
-		helpers.JsonResponse(w, 200, AuthResponse{Token: token})
+		helpers.JsonResponse(w, http.StatusOK, AuthResponse{Token: token})
 		return
 	}
 }
