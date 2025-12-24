@@ -20,7 +20,7 @@ func SliceContains[T comparable](slice []T, value T) bool {
 }
 
 func GetQueryPath(n string) string {
-	return fmt.Sprintf("./internal/db/queries/" + n)
+	return fmt.Sprintf("./internal/db/queries/%s", n)
 }
 
 func HashPassword(p string) string {
