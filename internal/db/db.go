@@ -133,7 +133,7 @@ func (d DB) tableExists(n string) (bool, error) {
 }
 
 func (d DB) createTable(n string) error {
-	path := fmt.Sprintf(mDir + n)
+	path := mDir + n
 	q, err := GetQuery(path)
 	if err != nil {
 		return fmt.Errorf("createTable: error reading query from %s, %v", path, err)
