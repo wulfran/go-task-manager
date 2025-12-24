@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"task-manager/internal/contextkeys"
 	"task-manager/internal/env"
 	"task-manager/internal/helpers"
 
@@ -49,6 +50,6 @@ func (s Server) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "uID", uID)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), contextkeys.UserID, uID)))
 	})
 }
