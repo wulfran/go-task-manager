@@ -32,7 +32,10 @@ func (s userService) RegisterUser(ctx context.Context, p models.CreateUserPayloa
 	if emailExists {
 		return fmt.Errorf("RegisterUser: email already in use")
 	}
-	p.Password = helpers.HashPassword(p.Password)
+	p.Password, err = helpers.HashPassword(p.Password)
+	if err != nil {
+		return fmt.Errorf("RegisterUser: failed to hash a password, %s", err)
+	}
 
 	if err := s.r.CreateUser(ctx, p); err != nil {
 		return fmt.Errorf("RegisterUser: failed to run create user: %v", err)

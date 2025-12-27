@@ -23,13 +23,13 @@ func GetQueryPath(n string) string {
 	return fmt.Sprintf("./internal/db/queries/%s", n)
 }
 
-func HashPassword(p string) string {
+func HashPassword(p string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(p), 6)
 	if err != nil {
-		fmt.Println("Failed to hash password!")
+		return "", err
 	}
 
-	return string(bytes)
+	return string(bytes), nil
 }
 
 func ValidatePassword(password, hash string) bool {
