@@ -22,5 +22,5 @@ type CreateUserPayload struct {
 
 type LoginPayload struct {
 	Email    string `json:"email"`
-	Password string `json:"Password"`
+	Password string `json:"password"`
 }
