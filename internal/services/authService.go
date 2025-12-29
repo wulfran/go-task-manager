@@ -2,7 +2,7 @@ package services
 
 import (
 	"fmt"
-	"task-manager/internal/env"
+	"task-manager/internal/config"
 	"task-manager/internal/models"
 	"time"
 
@@ -17,9 +17,9 @@ type authService struct {
 	jwtSecret []byte
 }
 
-func NewAuthService() AuthService {
+func NewAuthService(c config.JWTConfig) AuthService {
 	return &authService{
-		jwtSecret: []byte(env.Get("jwt_secret")),
+		jwtSecret: []byte(c.Secret),
 	}
 }
 

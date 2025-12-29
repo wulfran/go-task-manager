@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 	"task-manager/internal/contextkeys"
-	"task-manager/internal/env"
 	"task-manager/internal/helpers"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,7 +13,7 @@ import (
 
 func (s Server) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		jwtSecret := []byte(env.Get("jwt_secret"))
+		jwtSecret := []byte(s.Cfg.JWT.Secret)
 		tString := r.Header.Get("Authorization")
 		if tString == "" {
 			helpers.JsonResponse(w, http.StatusUnauthorized, fmt.Sprintf("token is missing!"))

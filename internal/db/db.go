@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"task-manager/internal/env"
+	"task-manager/internal/config"
 	"task-manager/internal/helpers"
 	"time"
 
@@ -28,7 +28,7 @@ type DB struct {
 	*sql.DB
 }
 
-type dbConfig struct {
+type dsnConfig struct {
 	Username string
 	Password string
 	Host     string
@@ -36,22 +36,22 @@ type dbConfig struct {
 	Database string
 }
 
-func createDsn() string {
-	config := dbConfig{
-		Username: env.Get("db_username"),
-		Password: env.Get("db_password"),
-		Host:     env.Get("db_host"),
-		Port:     env.Get("db_port"),
-		Database: env.Get("db_name"),
+func createDsn(c config.DBConfig) string {
+	cfg := dsnConfig{
+		Username: c.User,
+		Password: c.Password,
+		Host:     c.Host,
+		Port:     c.Port,
+		Database: c.Name,
 	}
 
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", config.Username, config.Password, config.Host, config.Port, config.Database)
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.Database)
 }
 
-func InitDb() (*DB, error) {
+func InitDb(c config.DBConfig) (*DB, error) {
 	fmt.Println("initializing db")
 	var err error
-	dsn := createDsn()
+	dsn := createDsn(c)
 	once.Do(func() {
 		var sqlDB *sql.DB
 		sqlDB, err = sql.Open("postgres", dsn)

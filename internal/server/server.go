@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"log"
+	"task-manager/internal/config"
 	"task-manager/internal/controllers"
 	"task-manager/internal/db"
 	"task-manager/internal/repository"
@@ -12,16 +13,17 @@ import (
 )
 
 type Server struct {
-	D db.DB
-	C controllers.Controllers
-	S services.Services
-	R repository.Repositories
-	H *chi.Mux
+	D   db.DB
+	C   controllers.Controllers
+	S   services.Services
+	R   repository.Repositories
+	H   *chi.Mux
+	Cfg config.Config
 }
 
-func New() *Server {
+func New(cfg config.Config) *Server {
 	// initialize database
-	d, err := db.InitDb()
+	d, err := db.InitDb(cfg.DB)
 	if err != nil {
 		log.Fatalf("unabled to initialize database: %v", err)
 	}
@@ -38,14 +40,15 @@ func New() *Server {
 
 	fmt.Println("Setting up repository, service and controller")
 	r := repository.New(*d)
-	svs := services.New(r)
+	svs := services.New(r, cfg.JWT)
 	c := controllers.New(svs)
 
 	s := &Server{
-		D: *d,
-		C: c,
-		S: svs,
-		R: r,
+		D:   *d,
+		C:   c,
+		S:   svs,
+		R:   r,
+		Cfg: cfg,
 	}
 
 	s.H = s.CreateServer()
