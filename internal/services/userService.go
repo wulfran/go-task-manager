@@ -47,7 +47,7 @@ func (s userService) RegisterUser(ctx context.Context, p models.CreateUserPayloa
 func (s userService) LoginUser(p models.LoginPayload) (models.User, error) {
 	u, err := s.r.GetUserData(p)
 	if err != nil {
-		return models.User{}, fmt.Errorf("LoginUser: failet to get user data: %v", err)
+		return models.User{}, fmt.Errorf("LoginUser: failed to get user data: %v", err)
 	}
 
 	return u, nil
