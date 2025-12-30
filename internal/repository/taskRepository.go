@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"task-manager/internal/contextkeys"
 	"task-manager/internal/db"
 	"task-manager/internal/helpers"
 	"task-manager/internal/models"
@@ -33,7 +34,7 @@ func (r taskRepository) Store(ctx context.Context, p models.TaskPayload) error {
 	if err != nil {
 		return fmt.Errorf("store: failed to read query: %v", err)
 	}
-	uID, ok := ctx.Value("uID").(int64)
+	uID, ok := ctx.Value(contextkeys.UserID).(int64)
 	if !ok || uID == 0 {
 		return fmt.Errorf("store: failed to get user id")
 	}
