@@ -84,7 +84,7 @@ func (uc usersController) Login() func(w http.ResponseWriter, r *http.Request) {
 
 		u, err := uc.us.LoginUser(p)
 		if err != nil {
-			helpers.JsonResponse(w, http.StatusUnauthorized, fmt.Sprintf("failed to authenticate: %v", err))
+			helpers.JsonResponse(w, http.StatusUnauthorized, fmt.Sprintf("failed to authenticate, incorrect credentials"))
 			return
 		}
 		fmt.Printf("%v", u)

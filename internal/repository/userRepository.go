@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"task-manager/internal/db"
 	"task-manager/internal/helpers"
@@ -79,6 +81,10 @@ func (u userRepository) GetUserData(p models.LoginPayload) (models.User, error) 
 	var uData models.User
 
 	err = u.db.QueryRow(q, p.Email).Scan(&uData.ID, &uData.Name, &uData.Email, &uData.Password, &uData.CreatedAt)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.User{}, fmt.Errorf("GetUserData: no entries found")
+	}
 
 	if err != nil {
 		return models.User{}, fmt.Errorf("GetUserData: failed to execute query: %v", err)
