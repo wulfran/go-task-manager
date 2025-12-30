@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"task-manager/internal/contextkeys"
 	"task-manager/internal/helpers"
 	"task-manager/internal/models"
 	"task-manager/internal/requests"
@@ -32,7 +33,7 @@ func NewTasksController(ts services.TaskService) TasksController {
 
 func (t tasksController) Index() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		uID, ok := r.Context().Value("uID").(int64)
+		uID, ok := r.Context().Value(contextkeys.UserID).(int64)
 		if !ok {
 			helpers.JsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("invalid user data, please relog"))
 			return

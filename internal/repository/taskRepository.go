@@ -168,10 +168,6 @@ func (r taskRepository) Index(uID int64) (models.TasksList, error) {
 		return models.TasksList{}, fmt.Errorf("index: query failed: %v", err)
 	}
 
-	if len(l.Tasks) == 0 {
-		return models.TasksList{}, fmt.Errorf("index: no entries for specified user")
-	}
-
 	return l, nil
 }
 func (r taskRepository) Delete(id int) error {
