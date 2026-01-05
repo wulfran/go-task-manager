@@ -24,6 +24,9 @@ func NewAuthService(c config.JWTConfig) AuthService {
 }
 
 func (a authService) CreateToken(u models.User) (string, error) {
+	if u.Email == "" || u.ID == 0 {
+		return "", fmt.Errorf("invalid user data provided")
+	}
 	claims := jwt.MapClaims{
 		"username": u.Email,
 		"userId":   u.ID,
