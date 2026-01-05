@@ -7,10 +7,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var fatalf = log.Fatalf
+
 func Load() Config {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("error while loading env file: %s", err)
+		fatalf("error while loading env file: %s", err)
 	}
 
 	cfg := Config{
@@ -34,11 +36,11 @@ func Load() Config {
 func validate(c Config) {
 	err := c.DB.Validate()
 	if err != nil {
-		log.Fatalf("DBConfig validation error: %s", err)
+		fatalf("DBConfig validation error: %s", err)
 	}
 
 	err = c.JWT.Validate()
 	if err != nil {
-		log.Fatalf("JWTConfig validation error: %s", err)
+		fatalf("JWTConfig validation error: %s", err)
 	}
 }
