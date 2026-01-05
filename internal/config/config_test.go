@@ -2,7 +2,42 @@ package config
 
 import "testing"
 
+func testValidateStruct[Struct testStruct](t *testing.T, s Struct, expectsError bool, errorWanted string) {
+	t.Helper()
+	err := s.Validate()
+
+	if expectsError && err == nil {
+		t.Errorf("validate should return an error but it did not")
+	}
+	if !expectsError && err != nil {
+		t.Errorf("unexpected error: %s", err)
+	}
+
+	if expectsError && err != nil {
+		if errorWanted != err.Error() {
+			t.Errorf("wrong error returned, expected <%s> but got <%s>", errorWanted, err)
+		}
+	}
+}
+
+type testStruct interface {
+	DBConfig |
+		JWTConfig |
+		structWithInt
+	Validate() error
+}
+
+type structWithInt struct {
+	name  string
+	count int
+}
+
+func (s structWithInt) Validate() error {
+	return validateStruct(s)
+}
+
 func TestDBConfig_Validate(t *testing.T) {
+	t.Parallel()
 	var tests = []struct {
 		name         string
 		dbStruct     DBConfig
@@ -24,7 +59,6 @@ func TestDBConfig_Validate(t *testing.T) {
 		{
 			"name missing",
 			DBConfig{
-				Name:     "",
 				User:     "Ipsum",
 				Password: "Dolor",
 				Host:     "Et",
@@ -37,7 +71,6 @@ func TestDBConfig_Validate(t *testing.T) {
 			"user missing",
 			DBConfig{
 				Name:     "Lorem",
-				User:     "",
 				Password: "Dolor",
 				Host:     "Et",
 				Port:     "Amet",
@@ -46,64 +79,62 @@ func TestDBConfig_Validate(t *testing.T) {
 			"User is required",
 		},
 		{
-			"Password missing",
+			"password missing",
 			DBConfig{
-				Name:     "Lorem",
-				User:     "Ipsum",
-				Password: "",
-				Host:     "Et",
-				Port:     "Amet",
+				Name: "Lorem",
+				User: "Ipsum",
+				Host: "Et",
+				Port: "Amet",
 			},
 			true,
 			"Password is required",
 		},
 		{
-			"Host missing",
+			"host missing",
 			DBConfig{
 				Name:     "Lorem",
 				User:     "Ipsum",
 				Password: "Dolor",
-				Host:     "",
 				Port:     "Amet",
 			},
 			true,
 			"Host is required",
 		},
 		{
-			"Port missing",
+			"port missing",
 			DBConfig{
 				Name:     "Lorem",
 				User:     "Ipsum",
 				Password: "Dolor",
 				Host:     "Et",
-				Port:     "",
 			},
 			true,
 			"Port is required",
+		},
+		{
+			"name is a whitespace",
+			DBConfig{
+				Name:     "   ",
+				User:     "Ipsum",
+				Password: "Dolor",
+				Host:     "Et",
+				Port:     "Amet",
+			},
+			true,
+			"Name is required",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := tc.dbStruct.Validate()
-
-			if tc.expectsError && err == nil {
-				t.Errorf("validate should return an error but it did not")
-			}
-			if !tc.expectsError && err != nil {
-				t.Errorf("unexpected error: %s", err)
-			}
-
-			if tc.expectsError && err != nil {
-				if tc.errorWanted != err.Error() || err.Error() == "" {
-					t.Errorf("wrong error returned, expected <%s> but got <%s>", tc.errorWanted, err)
-				}
-			}
+			t.Parallel()
+			testValidateStruct(t, tc.dbStruct, tc.expectsError, tc.errorWanted)
 		})
 	}
 }
 
 func TestJWTConfig_Validate(t *testing.T) {
+	t.Parallel()
 	var tests = []struct {
 		name         string
 		jwtStruct    JWTConfig
@@ -111,34 +142,72 @@ func TestJWTConfig_Validate(t *testing.T) {
 		errorWanted  string
 	}{
 		{
-			"Valid input, no errors",
+			"valid input, no errors",
 			JWTConfig{Secret: "test-secret"},
 			false,
 			"",
 		},
 		{
-			"Secret missing",
-			JWTConfig{Secret: ""},
+			"secret missing",
+			JWTConfig{},
+			true,
+			"Secret is required",
+		},
+		{
+			"secret is whitespace",
+			JWTConfig{Secret: "  "},
 			true,
 			"Secret is required",
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := tc.jwtStruct.Validate()
+			t.Parallel()
+			testValidateStruct(t, tc.jwtStruct, tc.expectsError, tc.errorWanted)
+		})
+	}
+}
 
-			if tc.expectsError && err == nil {
-				t.Errorf("validate should return an error but it did not")
-			}
-			if !tc.expectsError && err != nil {
-				t.Errorf("unexpected error: %s", err)
-			}
+func TestValidateZeroValue(t *testing.T) {
+	t.Parallel()
+	var tests = []struct {
+		name         string
+		inputStruct  structWithInt
+		expectsError bool
+		errorWanted  string
+	}{
+		{
+			"valid value",
+			structWithInt{
+				name:  "Lorem",
+				count: 12,
+			},
+			false,
+			"",
+		},
+		{
+			"zero value",
+			structWithInt{
+				name:  "Lorem",
+				count: 0,
+			},
+			true,
+			"count is required",
+		},
+		{
+			"missing int value",
+			structWithInt{
+				name: "Lorem",
+			},
+			true,
+			"count is required",
+		},
+	}
 
-			if tc.expectsError && err != nil {
-				if tc.errorWanted != err.Error() || err.Error() == "" {
-					t.Errorf("wrong error returned, expected <%s> but got <%s>", tc.errorWanted, err)
-				}
-			}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			testValidateStruct(t, tc.inputStruct, tc.expectsError, tc.errorWanted)
 		})
 	}
 }
