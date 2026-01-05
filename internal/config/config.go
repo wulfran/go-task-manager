@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type Validator interface {
@@ -38,7 +39,12 @@ func validateStruct(s any) error {
 	t := v.Type()
 
 	for i := 0; i < v.NumField(); i++ {
-		if v.Field(i).IsZero() {
+		f := v.Field(i)
+		if f.Kind() == reflect.String {
+			if strings.TrimSpace(f.String()) == "" {
+				return fmt.Errorf("%s is required", t.Field(i).Name)
+			}
+		} else if f.IsZero() {
 			return fmt.Errorf("%s is required", t.Field(i).Name)
 		}
 	}
