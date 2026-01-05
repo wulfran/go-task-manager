@@ -60,14 +60,14 @@ func (s taskService) ShowTask(id int) (models.Task, error) {
 func (s taskService) DeleteTask(id int, uID int64) error {
 	isOwner, err := s.IsTaskOwner(uID, id)
 	if err != nil {
-		return fmt.Errorf("deleteTask: failed to check if user is owner: %v", err)
+		return fmt.Errorf("deleteTask: %s", err)
 	}
 	if !isOwner {
 		return fmt.Errorf("deleteTask: you are not authorized to execute this action")
 	}
 
 	if err := s.r.Delete(id); err != nil {
-		return fmt.Errorf("DeleteTask: %v", err)
+		return fmt.Errorf("DeleteTask: %s", err)
 	}
 
 	return nil

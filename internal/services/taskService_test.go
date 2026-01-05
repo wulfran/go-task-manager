@@ -18,7 +18,7 @@ type mockTaskRepository struct {
 	updateFn      func(ctx context.Context, p models.UpdateTask) (models.Task, error)
 	showFn        func(id int) (models.Task, error)
 	isTaskOwnerFn func(uID int64, id int) (bool, error)
-	deleteTaskFn  func(id int) error
+	deleteFn      func(id int) error
 }
 
 func (m mockTaskRepository) Store(ctx context.Context, p models.TaskPayload) error {
@@ -51,8 +51,8 @@ func (m mockTaskRepository) Index(uID int64) (models.TasksList, error) {
 }
 
 func (m mockTaskRepository) Delete(id int) error {
-	if m.deleteTaskFn != nil {
-		return m.deleteTaskFn(id)
+	if m.deleteFn != nil {
+		return m.deleteFn(id)
 	}
 	return nil
 }
@@ -684,7 +684,7 @@ func TestTaskService_DeleteTask(t *testing.T) {
 	}{
 		{
 			"valid values, no error",
-			mockTaskRepository{deleteTaskFn: func(id int) error {
+			mockTaskRepository{deleteFn: func(id int) error {
 				return nil
 			}},
 			1,
@@ -694,19 +694,41 @@ func TestTaskService_DeleteTask(t *testing.T) {
 		},
 		{
 			"valid values, user not an owner",
-			mockTaskRepository{deleteTaskFn: func(id int) error {
-				return fmt.Errorf("you are not authorized to execute this action")
-			}},
+			mockTaskRepository{
+				deleteFn: func(id int) error {
+					return fmt.Errorf("you are not authorized to execute this action")
+				},
+				isTaskOwnerFn: func(uID int64, id int) (bool, error) {
+					return false, nil
+				},
+			},
 			1,
 			12,
 			true,
-			"DeleteTask: you are not authorized to execute this action",
+			"deleteTask: you are not authorized to execute this action",
+		},
+		{
+			"valid values, failed to check ownership",
+			mockTaskRepository{
+				deleteFn: func(id int) error {
+					return fmt.Errorf("deleteTask")
+				},
+				isTaskOwnerFn: func(uID int64, id int) (bool, error) {
+					return false, fmt.Errorf("database error")
+				},
+			},
+			1,
+			12,
+			true,
+			"deleteTask: failed to check if user is a task owner: database error",
 		},
 		{
 			"valid values, failed to delete",
-			mockTaskRepository{deleteTaskFn: func(id int) error {
-				return fmt.Errorf("delete: failed to execute query")
-			}},
+			mockTaskRepository{
+				deleteFn: func(id int) error {
+					return fmt.Errorf("delete: failed to execute query")
+				},
+			},
 			1,
 			12,
 			true,
