@@ -72,7 +72,6 @@ func (s taskService) DeleteTask(id int, uID int64) error {
 
 	return nil
 }
-
 func (s taskService) IsTaskOwner(uID int64, id int) (bool, error) {
 	isOwner, err := s.r.IsTaskOwner(uID, id)
 	if err != nil {

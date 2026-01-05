@@ -81,7 +81,7 @@ func (t tasksController) Store(bodySizeLimit int64) func(w http.ResponseWriter, 
 }
 func (t tasksController) Show() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		uID, ok := r.Context().Value("uID").(int64)
+		uID, ok := r.Context().Value(contextkeys.UserID).(int64)
 		if !ok {
 			helpers.JsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("invalid user data, please relog"))
 			return
@@ -132,7 +132,7 @@ func (t tasksController) Update(bodySizeLimit int64) func(w http.ResponseWriter,
 			return
 		}
 
-		uID, ok := r.Context().Value("uID").(int64)
+		uID, ok := r.Context().Value(contextkeys.UserID).(int64)
 		if !ok {
 			helpers.JsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("invalid user data, please relog"))
 			return
@@ -168,7 +168,7 @@ func (t tasksController) Update(bodySizeLimit int64) func(w http.ResponseWriter,
 }
 func (t tasksController) Delete() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		uID, ok := r.Context().Value("uID").(int64)
+		uID, ok := r.Context().Value(contextkeys.UserID).(int64)
 		if !ok {
 			helpers.JsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("invalid user data please relog"))
 			return

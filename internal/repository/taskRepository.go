@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"task-manager/internal/contextkeys"
 	"task-manager/internal/db"
@@ -87,7 +88,7 @@ func (r taskRepository) Update(ctx context.Context, p models.UpdateTask) (models
 	t.DueDate = p.DueDate
 	t.ID = int(p.ID)
 
-	uID := ctx.Value("uID").(int64)
+	uID := ctx.Value(contextkeys.UserID).(int64)
 	if uID != t.CreatedBy {
 		return models.Task{}, fmt.Errorf("user not authorized for this action")
 	}
@@ -130,6 +131,9 @@ func (r taskRepository) Show(id int) (models.Task, error) {
 	var desc sql.NullString
 
 	err = r.d.QueryRow(q, id).Scan(&t.Name, &t.Priority, &desc, &t.DueDate, &t.CreatedAt, &t.CreatedBy)
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.Task{}, fmt.Errorf("no results for given ID")
+	}
 	if err != nil {
 		return models.Task{}, fmt.Errorf("show: failed to execute query:%v ", err)
 	}
