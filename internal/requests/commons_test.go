@@ -20,7 +20,7 @@ func TestCommonsSetFailed(t *testing.T) {
 			},
 			ValidationResult{
 				Validated: false,
-				Message:   "lorem ipsum, ",
+				Message:   "lorem ipsum",
 			},
 			"lorem ipsum",
 		},
@@ -28,11 +28,11 @@ func TestCommonsSetFailed(t *testing.T) {
 			"already failed, append message",
 			ValidationResult{
 				Validated: false,
-				Message:   "lorem ipsum, ",
+				Message:   "lorem ipsum",
 			},
 			ValidationResult{
 				Validated: false,
-				Message:   "lorem ipsum, dolor et, ",
+				Message:   "lorem ipsum, dolor et",
 			},
 			"dolor et",
 		},
