@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"strings"
 	"task-manager/internal/models"
 	"time"
 )
@@ -16,9 +17,9 @@ type CreateTasksRequest struct {
 func (r CreateTasksRequest) Validate() ValidationResult {
 	var res ValidationResult
 	res.Validated = true
-	l := len(r.Name)
+	l := len(strings.TrimSpace(r.Name))
 	if l < 3 || l > 64 {
-		res.SetFailed("name must be between 3 and 64 characters.")
+		res.SetFailed("name must be between 3 and 64 characters")
 	}
 
 	if r.Priority < models.PriorityLow || r.Priority > models.PriorityHigh {
@@ -27,6 +28,10 @@ func (r CreateTasksRequest) Validate() ValidationResult {
 
 	if r.Priority == models.PriorityHigh && r.DueDate == nil {
 		res.SetFailed("for priority high due date is required")
+	}
+
+	if len(r.Description) > 255 {
+		res.SetFailed("description too long")
 	}
 
 	return res
@@ -43,9 +48,9 @@ type UpdateTaskRequest struct {
 func (r UpdateTaskRequest) Validate() ValidationResult {
 	var res ValidationResult
 	res.Validated = true
-	l := len(r.Name)
-	if l > 0 && (l < 3 || l > 64) {
-		res.SetFailed("name must be between 3 and 64 characters.")
+	l := len(strings.TrimSpace(r.Name))
+	if l < 3 || l > 64 {
+		res.SetFailed("name must be between 3 and 64 characters")
 	}
 
 	if r.Priority < models.PriorityLow || r.Priority > models.PriorityHigh {
@@ -57,7 +62,7 @@ func (r UpdateTaskRequest) Validate() ValidationResult {
 	}
 
 	if len(r.Description) > 255 {
-		res.SetFailed("description too long.")
+		res.SetFailed("description too long")
 	}
 
 	return res
