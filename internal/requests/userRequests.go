@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"strings"
 	"task-manager/internal/helpers"
 )
 
@@ -11,18 +12,26 @@ type CreateUserRequest struct {
 }
 
 func (r CreateUserRequest) Validate() ValidationResult {
-	var res ValidationResult
+	res := ValidationResult{
+		Validated: true,
+		Message:   "",
+	}
 
-	if len(r.Name) < 3 {
-		res.SetFailed("Name has to be at least 3 characters long.")
+	nl := len(strings.TrimSpace(r.Name))
+	if nl < 3 {
+		res.SetFailed("name has to be at least 3 characters long")
 	}
 
 	if !helpers.IsValidEmail(r.Email) {
-		res.SetFailed("Email invalid.")
+		res.SetFailed("email invalid")
 	}
 
-	if len(r.Password) < 5 {
-		res.SetFailed("Password has to be at least 5 characters long.")
+	pl := len(strings.TrimSpace(r.Password))
+	if pl < 5 {
+		res.SetFailed("password has to be at least 5 characters long")
+	}
+	if pl > 72 {
+		res.SetFailed("password too long")
 	}
 
 	return res
@@ -40,18 +49,22 @@ type Credentials struct {
 }
 
 func (c Credentials) Validate() ValidationResult {
-	var r ValidationResult
-	r.Validated = true
-	if len(c.Email) < 1 {
-		r.SetFailed("Missing e-mail")
+	r := ValidationResult{
+		Validated: true,
+		Message:   "",
+	}
+	el := len(strings.TrimSpace(c.Email))
+	if el < 1 {
+		r.SetFailed("missing e-mail")
 	}
 
-	if len(c.Password) < 1 {
-		r.SetFailed("Missing password")
+	pl := len(strings.TrimSpace(c.Password))
+	if pl < 1 || pl > 72 {
+		r.SetFailed("password is missing or has invalid length")
 	}
 
 	if !helpers.IsValidEmail(c.Email) {
-		r.SetFailed("E-mail invalid")
+		r.SetFailed("e-mail invalid")
 	}
 
 	return r
