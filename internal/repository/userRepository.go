@@ -28,7 +28,7 @@ func NewUserRepository(d db.DB) UserRepository {
 }
 
 func (u userRepository) CreateUser(ctx context.Context, r models.CreateUserPayload) error {
-	q, err := db.GetQuery("user/InsertUser.sql")
+	q, err := db.GetQuery("queries/user/InsertUser.sql")
 	if err != nil {
 		return fmt.Errorf("CreateUser: error while reading query: %v", err)
 	}
@@ -59,7 +59,7 @@ func (u userRepository) CreateUser(ctx context.Context, r models.CreateUserPaylo
 	return nil
 }
 func (u userRepository) CheckIfEmailExists(email string) (bool, error) {
-	q, err := db.GetQuery("user/EmailExistsWithinUsers.sql")
+	q, err := db.GetQuery("queries/user/EmailExistsWithinUsers.sql")
 	if err != nil {
 		return false, fmt.Errorf("CheckIfEmailExists: error while reading query: %v", err)
 	}
@@ -74,7 +74,7 @@ func (u userRepository) CheckIfEmailExists(email string) (bool, error) {
 	return exists, nil
 }
 func (u userRepository) GetUserData(p models.LoginPayload) (models.User, error) {
-	q, err := db.GetQuery("user/LoginUser.sql")
+	q, err := db.GetQuery("queries/user/LoginUser.sql")
 	if err != nil {
 		return models.User{}, fmt.Errorf("GetUserData: error while reading query: %v", err)
 	}
