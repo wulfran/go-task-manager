@@ -400,49 +400,6 @@ func TestSliceContainsArrays(t *testing.T) {
 	testSliceContainsGeneric(t, tests)
 }
 
-func TestGetQueryPath(t *testing.T) {
-	var tests = []struct {
-		name        string
-		passedStr   string
-		expectedStr string
-	}{
-		{
-			"simple file name",
-			"lorem.ips",
-			"./internal/db/queries/lorem.ips",
-		},
-		{
-			"simple word",
-			"lorem",
-			"./internal/db/queries/lorem",
-		},
-		{
-			"empty string",
-			"",
-			"./internal/db/queries/",
-		},
-		{
-			"special chars",
-			"l0r@m.#$@",
-			"./internal/db/queries/l0r@m.#$@",
-		},
-		{
-			"path separator",
-			"//lorem.ips",
-			"./internal/db/queries///lorem.ips",
-		},
-	}
-
-	for _, i := range tests {
-		t.Run(i.name, func(t *testing.T) {
-			qPath := GetQueryPath(i.passedStr)
-			if qPath != i.expectedStr {
-				t.Errorf("returned path <%s> but expected value <%s>", qPath, i.expectedStr)
-			}
-		})
-	}
-}
-
 func TestHashPassword(t *testing.T) {
 	var tests = []struct {
 		name         string

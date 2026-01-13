@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"task-manager/internal/contextkeys"
 	"task-manager/internal/db"
-	"task-manager/internal/helpers"
 	"task-manager/internal/models"
 )
 
@@ -31,7 +30,7 @@ func NewTaskRepository(d db.DB) TaskRepository {
 }
 
 func (r taskRepository) Store(ctx context.Context, p models.TaskPayload) error {
-	q, err := db.GetQuery(helpers.GetQueryPath("task/InsertTask.sql"))
+	q, err := db.GetQuery("task/InsertTask.sql")
 	if err != nil {
 		return fmt.Errorf("store: failed to read query: %v", err)
 	}
@@ -66,7 +65,7 @@ func (r taskRepository) Store(ctx context.Context, p models.TaskPayload) error {
 	return nil
 }
 func (r taskRepository) Update(ctx context.Context, p models.UpdateTask) (models.Task, error) {
-	q, err := db.GetQuery(helpers.GetQueryPath("task/GetTask.sql"))
+	q, err := db.GetQuery("task/GetTask.sql")
 	if err != nil {
 		return models.Task{}, fmt.Errorf("update: failed to read query: %v", err)
 	}
@@ -93,7 +92,7 @@ func (r taskRepository) Update(ctx context.Context, p models.UpdateTask) (models
 		return models.Task{}, fmt.Errorf("user not authorized for this action")
 	}
 
-	uq, err := db.GetQuery(helpers.GetQueryPath("task/UpdateTask.sql"))
+	uq, err := db.GetQuery("task/UpdateTask.sql")
 	if err != nil {
 		return models.Task{}, fmt.Errorf("update: failed to read update query, %v", err)
 	}
@@ -123,7 +122,7 @@ func (r taskRepository) Update(ctx context.Context, p models.UpdateTask) (models
 	return t, nil
 }
 func (r taskRepository) Show(id int) (models.Task, error) {
-	q, err := db.GetQuery(helpers.GetQueryPath("task/GetTask.sql"))
+	q, err := db.GetQuery("task/GetTask.sql")
 	if err != nil {
 		return models.Task{}, fmt.Errorf("show: failed to read query:%v", err)
 	}
@@ -144,7 +143,7 @@ func (r taskRepository) Show(id int) (models.Task, error) {
 	return t, nil
 }
 func (r taskRepository) Index(uID int64) (models.TasksList, error) {
-	q, err := db.GetQuery(helpers.GetQueryPath("task/GetTasksList.sql"))
+	q, err := db.GetQuery("task/GetTasksList.sql")
 	if err != nil {
 		return models.TasksList{}, fmt.Errorf("index: failed to read query: %v", err)
 	}
@@ -176,7 +175,7 @@ func (r taskRepository) Index(uID int64) (models.TasksList, error) {
 	return l, nil
 }
 func (r taskRepository) Delete(id int) error {
-	q, err := db.GetQuery(helpers.GetQueryPath("task/DeleteTask.sql"))
+	q, err := db.GetQuery("task/DeleteTask.sql")
 	if err != nil {
 		return fmt.Errorf("delete: failed to read query:%v", err)
 	}
@@ -189,7 +188,7 @@ func (r taskRepository) Delete(id int) error {
 	return nil
 }
 func (r taskRepository) IsTaskOwner(uID int64, id int) (bool, error) {
-	q, err := db.GetQuery(helpers.GetQueryPath("task/GetTaskOwner.sql"))
+	q, err := db.GetQuery("task/GetTaskOwner.sql")
 	if err != nil {
 		return false, fmt.Errorf("isTaskOwner: failed to read query: %v", err)
 	}

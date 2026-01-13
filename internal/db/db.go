@@ -3,9 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"io"
-	"os"
-	"strings"
 	"sync"
 	"task-manager/internal/config"
 	"task-manager/internal/helpers"
@@ -84,9 +81,9 @@ func (d DB) RunMigrations() error {
 		return fmt.Errorf("db: RunMigrations: %v", err)
 	}
 
-	m, err := os.ReadDir(fmt.Sprintf(mDir))
+	m, err := SQLFiles.ReadDir("migrations")
 	if err != nil {
-		return fmt.Errorf("db: RunMigrations: error while reading migrations dir: %v", err)
+		return fmt.Errorf("db: RunMigrations: error while reading migrations dir: %s", err)
 	}
 
 	for _, item := range m {
@@ -103,22 +100,16 @@ func (d DB) RunMigrations() error {
 }
 
 func GetQuery(path string) (string, error) {
-	file, err := os.Open(path)
+	data, err := SQLFiles.ReadFile(path)
 	if err != nil {
-		return "", fmt.Errorf("GetQuery: unable to read query file %s, %v", path, err)
+		return "", fmt.Errorf("GetQuery: unable to read embedded query from path %s: %v", path, err)
 	}
-	defer file.Close()
 
-	b := new(strings.Builder)
-	_, err = io.Copy(b, file)
-	if err != nil {
-		return "", fmt.Errorf("GetQuery: failed to read query into the variable: %v", err)
-	}
-	return b.String(), nil
+	return string(data), nil
 }
 
 func (d DB) tableExists(n string) (bool, error) {
-	q, err := GetQuery(dbDir + "/queries/utils/tableExists.sql")
+	q, err := GetQuery("queries/utils/tableExists.sql")
 	if err != nil {
 		fmt.Println(q)
 		return false, fmt.Errorf("tableExists: error while reading query: %v", err)
@@ -133,10 +124,9 @@ func (d DB) tableExists(n string) (bool, error) {
 }
 
 func (d DB) createTable(n string) error {
-	path := mDir + n
-	q, err := GetQuery(path)
+	q, err := GetQuery("migrations/" + n)
 	if err != nil {
-		return fmt.Errorf("createTable: error reading query from %s, %v", path, err)
+		return fmt.Errorf("createTable: error reading query from %s, %v", "migrations/"+n, err)
 	}
 
 	_, err = d.Exec(q)
@@ -152,9 +142,9 @@ func (d DB) createTable(n string) error {
 }
 
 func (d DB) registerMigration(n string) error {
-	q, err := GetQuery(fmt.Sprintf(dbDir + "/queries/utils/insertMigration.sql"))
+	q, err := GetQuery("queries/utils/insertMigration.sql")
 	if err != nil {
-		return fmt.Errorf("registerMigraion: error while reading query: %v", err)
+		return fmt.Errorf("registerMigration: error while reading query: %v", err)
 	}
 	q = fmt.Sprintf(q, n, time.Now().Format(time.RFC3339))
 	_, err = d.Exec(q)
@@ -165,7 +155,7 @@ func (d DB) registerMigration(n string) error {
 }
 
 func (d DB) getMigrated() ([]string, error) {
-	q, err := GetQuery(fmt.Sprintf(dbDir + "/queries/utils/readMigrationsTable.sql"))
+	q, err := GetQuery("queries/utils/readMigrationsTable.sql")
 	if err != nil {
 		return nil, fmt.Errorf("db: getMigrated: error while reading migrations table: %v", err)
 	}

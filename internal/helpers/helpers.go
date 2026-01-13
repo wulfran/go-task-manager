@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/mail"
 	"regexp"
@@ -17,10 +16,6 @@ func SliceContains[T comparable](slice []T, value T) bool {
 		}
 	}
 	return false
-}
-
-func GetQueryPath(n string) string {
-	return fmt.Sprintf("./internal/db/queries/%s", n)
 }
 
 func HashPassword(p string) (string, error) {
